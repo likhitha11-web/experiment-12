@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Lifecycle for FoodDash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .lifecycle-container {
+            position: relative;
+            width: 600px;
+            height: 350px;
+            flex-shrink: 0;
+        }
+        .stage {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        .stage.active {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-color: #fb923c;
+        }
+        .stage svg {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 6px;
+        }
+        .stage span {
+            font-size: 0.8rem;
+        }
+        /* Positioning each stage in an infinity loop shape */
+        #plan { top: 0; left: 80px; background-color: #e0f2fe; color: #0c4a6e; }
+        #develop { top: 85px; left: 0; background-color: #e0f7fa; color: #164e63; }
+        #build { top: 210px; left: 40px; background-color: #dcfce7; color: #166534; }
+        #test { top: 250px; left: 170px; background-color: #fefce8; color: #854d0e; }
+        #release { top: 210px; left: 460px; background-color: #fae8ff; color: #701a75; }
+        #deploy { top: 85px; left: 500px; background-color: #ffeee8; color: #991b1b; }
+        #operate { top: 0; left: 420px; background-color: #f1f5f9; color: #334155; }
+        #monitor { top: 125px; left: 380px; background-color: #eef2ff; color: #3730a3; }
+
+        .devops-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 75px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'%3E%3Cpath fill='%239ca3af' d='M10.14,4.22 C12.33,4.22 14.1,5.95 14.1,8.1 C14.1,10.25 12.33,12 10.14,12 C7.95,12 6.18,10.25 6.18,8.1 C6.18,5.95 7.95,4.22 10.14,4.22 M10.14,2 C6.75,2 4,4.72 4,8.1 C4,11.48 6.75,14.2 10.14,14.2 C13.53,14.2 16.28,11.48 16.28,8.1 C16.28,4.72 13.53,2 10.14,2 Z M9.86,4.22 C7.67,4.22 5.9,5.95 5.9,8.1 C5.9,10.25 7.67,12 9.86,12 C12.05,12 13.82,10.25 13.82,8.1 C13.82,5.95 12.05,4.22 9.86,4.22 M9.86,2 C13.25,2 16,4.72 16,8.1 C16,11.48 13.25,14.2 9.86,14.2 C6.47,14.2 3.72,11.48 3.72,8.1 C3.72,4.72 6.47,2 9.86,2 Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+
+        .arrow {
+            position: absolute;
+            height: 2px;
+            background-color: #9ca3af;
+            transform-origin: 0 50%;
+            z-index: -1;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 8px solid #9ca3af;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #description-box {
+            width: 400px;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            transition: opacity 0.3s ease;
+        }
+        #description-box h3 {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        #description-box svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.75rem;
+        }
+        #description-box p {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .lifecycle-container {
+                transform: scale(0.85);
+            }
+            #description-box {
+                width: 100%;
+                max-width: 600px;
+                margin-top: -2rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .lifecycle-container {
+                transform: scale(0.6);
+            }
+             #description-box {
+                margin-top: -5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">The DevOps Lifecycle of FoodDash</h1>
+        <p class="text-gray-600 mb-8 max-w-2xl mx-auto">An interactive visualization of our continuous development and operations process. Click on any stage to learn more.</p>
+
+        <div class="main-container">
+            <div class="lifecycle-container">
+                <!-- Arrows will be drawn here by JS -->
+                <div class="devops-center"></div>
+
+                <!-- DevOps Stages -->
+                <div id="plan" class="stage" data-title="Plan">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.153 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-1.125 0-2.062.938-2.062 2.063v7.5c0 1.125.937 2.063 2.063 2.063h9.05c1.125 0 2.063-.938 2.063-2.063v-7.5c0-1.125-.938-2.063-2.063-2.063H8.25z" /></svg>
+                    <span class="font-semibold">Plan</span>
+                </div>
+                <div id="develop" class="stage" data-title="Develop">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
+                    <span class="font-semibold">Develop</span>
+                </div>
+                <div id="build" class="stage" data-title="Build">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                    <span class="font-semibold">Build</span>
+                </div>
+                <div id="test" class="stage" data-title="Test">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+                    <span class="font-semibold">Test</span>
+                </div>
+                <div id="release" class="stage" data-title="Release">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+                    <span class="font-semibold">Release</span>
+                </div>
+                <div id="deploy" class="stage" data-title="Deploy">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3v11.25" /></svg>
+                    <span class="font-semibold">Deploy</span>
+                </div>
+                <div id="operate" class="stage" data-title="Operate">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6A2.25 2.25 0 018.25 8.25V15.75a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 15.75V8.25A2.25 2.25 0 014.5 6h6zM15 6a2.25 2.25 0 012.25 2.25v9.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V8.25A2.25 2.25 0 0113.5 6h1.5z" /></svg>
+                    <span class="font-semibold">Operate</span>
+                </div>
+                <div id="monitor" class="stage" data-title="Monitor">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
+                    <span class="font-semibold">Monitor</span>
+                </div>
+            </div>
+            <div id="description-box">
+                <!-- Description will be loaded here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stages = document.querySelectorAll('.stage');
+            const descriptionBox = document.getElementById('description-box');
+            const lifecycleContainer = document.querySelector('.lifecycle-container');
+
+            const descriptions = {
+                'Plan': "This is the starting point. We define business requirements, plan new features like 'user reviews' or 'new cuisines' for FoodDash, and create tasks in a project management tool like Jira or Trello.",
+                'Develop': "Our developers write the code for the planned features. This involves editing `index.html` for structure, `style.css` for looks, and `script.js` for application logic, then committing changes to a Git repository.",
+                'Build': "The new code is integrated and compiled. A Continuous Integration (CI) server like Jenkins or GitHub Actions automatically creates a 'build' of the application, ensuring all parts work together.",
+                'Test': "The build undergoes automated and manual testing. We run scripts to check login, cart functionality, and order processing. Quality Assurance (QA) engineers test for bugs to ensure a stable user experience.",
+                'Release': "Once testing is passed, the build is versioned (e.g., v1.1.0) and packaged for deployment. This artifact is stored and is ready to be pushed to the live servers.",
+                'Deploy': "Using a Continuous Deployment (CD) pipeline, the new version is pushed to the production environment. This makes the new features available to all FoodDash users with minimal downtime.",
+                'Operate': "We manage the application's infrastructure (servers, databases). This includes scaling resources during peak hours (like lunchtime) and ensuring the platform is secure and available 24/7.",
+                'Monitor': "We continuously watch the live application for errors, performance issues (e.g., slow loading times), and user activity. This data and user feedback directly inform the next 'Plan' phase, completing the loop."
+            };
+            
+            function updateDescription(stageElement) {
+                const title = stageElement.dataset.title;
+                const description = descriptions[title];
+                const icon = stageElement.querySelector('svg').outerHTML;
+
+                descriptionBox.innerHTML = `
+                    <h3 style="color: ${stageElement.style.color};">
+                        ${icon}
+                        <span>${title}</span>
+                    </h3>
+                    <p>${description}</p>
+                `;
+                
+                stages.forEach(s => s.classList.remove('active'));
+                stageElement.classList.add('active');
+            }
+
+            stages.forEach(stage => {
+                stage.addEventListener('click', () => {
+                    updateDescription(stage);
+                });
+            });
+            
+            // Function to draw an arrow between two elements
+            function drawArrow(el1, el2) {
+                const p1 = { x: el1.offsetLeft + el1.offsetWidth / 2, y: el1.offsetTop + el1.offsetHeight / 2 };
+                const p2 = { x: el2.offsetLeft + el2.offsetWidth / 2, y: el2.offsetTop + el2.offsetHeight / 2 };
+
+                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+                const length = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+
+                const arrow = document.createElement('div');
+                arrow.classList.add('arrow');
+                arrow.style.width = `${length}px`;
+                arrow.style.left = `${p1.x}px`;
+                arrow.style.top = `${p1.y}px`;
+                arrow.style.transform = `rotate(${angle}deg)`;
+                
+                lifecycleContainer.appendChild(arrow);
+            }
+
+            function drawAllArrows() {
+                // Clear existing arrows
+                lifecycleContainer.querySelectorAll('.arrow').forEach(a => a.remove());
+
+                const stageIds = ['plan', 'develop', 'build', 'test', 'monitor', 'operate', 'deploy', 'release', 'plan'];
+                for (let i = 0; i < stageIds.length - 1; i++) {
+                    const fromEl = document.getElementById(stageIds[i]);
+                    const toEl = document.getElementById(stageIds[i+1]);
+                    if (fromEl && toEl) {
+                        drawArrow(fromEl, toEl);
+                    }
+                }
+            }
+
+            // Initial state
+            updateDescription(document.getElementById('plan'));
+            drawAllArrows();
+
+            // Redraw on resize
+            window.addEventListener('resize', drawAllArrows);
+        });
+    </script>
+</body>
+</html>
